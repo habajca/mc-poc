@@ -2,8 +2,8 @@ package controller
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.http.scaladsl.server.Directives.{complete, get, path}
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity }
+import akka.http.scaladsl.server.Directives.{ complete, get, path }
 import akka.stream.ActorMaterializer
 
 object Server extends App {
