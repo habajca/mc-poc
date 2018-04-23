@@ -68,6 +68,8 @@ lazy val controller = (project in file("controller"))
       "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
       "com.typesafe.akka" %% "akka-http-xml" % akkaHttpVersion,
       "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+      "de.heikoseeberger" %% "akka-http-json4s" % "1.20.1",
+      "org.json4s" %% "json4s-jackson" % "3.5.3",
       "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
       "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
       "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
