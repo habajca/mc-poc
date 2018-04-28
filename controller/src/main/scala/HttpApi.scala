@@ -41,8 +41,12 @@ object HttpApi extends App with Directives with Json4sSupport {
         }
     }
 
-  val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
-  println("Controller API started at http://localhost:8080/")
+  {
+    Http().bindAndHandle(route, "localhost", 8080)
+    println("Controller API started at http://localhost:8080/")
+
+    system.actorOf(ExampleActor.props, "example-actor")
+  }
 }
 
 case class HttpResponse[T](content: T,
