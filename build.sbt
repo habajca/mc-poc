@@ -2,6 +2,7 @@ lazy val akkaHttpVersion = "10.1.1"
 lazy val akkaVersion = "2.5.12"
 
 lazy val root = (project in file("."))
+  .disablePlugins(sbtassembly.AssemblyPlugin)
   .settings(
     name := "mc-poc"
   )
@@ -15,6 +16,21 @@ lazy val controller = (project in file("controller"))
         scalaVersion := "2.12.5"
       )),
     name := "mc-poc-controller",
+    organization := "com.habajca",
+    version := "0.0-SNAPHSOT",
+    test in assembly := {},
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+      "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
+      "com.typesafe.akka" %% "akka-http-xml" % akkaHttpVersion,
+      "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+      "de.heikoseeberger" %% "akka-http-json4s" % "1.20.1",
+      "org.json4s" %% "json4s-jackson" % "3.5.3",
+      "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
+      "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
+      "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
+      "org.scalatest" %% "scalatest" % "3.0.1" % Test
+    ),
     scalacOptions ++= Seq(
       "-deprecation", // Emit warning and location for usages of deprecated APIs.
       "-encoding",
@@ -62,17 +78,5 @@ lazy val controller = (project in file("controller"))
       "-Ywarn-unused:patvars", // Warn if a variable bound in a pattern is unused.
       "-Ywarn-unused:privates", // Warn if a private member is unused.
       "-Ywarn-value-discard" // Warn when non-Unit expression results are unused.
-    ),
-    libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
-      "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
-      "com.typesafe.akka" %% "akka-http-xml" % akkaHttpVersion,
-      "com.typesafe.akka" %% "akka-stream" % akkaVersion,
-      "de.heikoseeberger" %% "akka-http-json4s" % "1.20.1",
-      "org.json4s" %% "json4s-jackson" % "3.5.3",
-      "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
-      "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
-      "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
-      "org.scalatest" %% "scalatest" % "3.0.1" % Test
     )
   )
