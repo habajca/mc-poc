@@ -1,6 +1,8 @@
 package controller
 
-import akka.actor.ActorSystem
+import controller.HelloWorldActor.HelloWorldRequest
+
+import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives
 import akka.stream.ActorMaterializer
@@ -15,13 +17,15 @@ object HttpApi extends App with Directives with Json4sSupport {
   implicit val serialization = jackson.Serialization
   implicit val formats = DefaultFormats
 
-  val route =
+  def route(example: ActorRef) =
     path("hello") {
       get {
+        example ! HelloWorldRequest(None)
         complete(HttpResponse("Hello, world!"))
       } ~
         (put & entity(as[Option[HelloUser]])) {
           case r @ Some(HelloUser(Some(name))) =>
+            example ! HelloWorldRequest(Option(name))
             complete(
               HttpResponse(
                 content = s"Hello, $name!",
@@ -30,6 +34,7 @@ object HttpApi extends App with Directives with Json4sSupport {
                 )
               ))
           case r =>
+            example ! HelloWorldRequest(None)
             complete(
               HttpResponse(
                 content = "Hello, world!",
@@ -42,10 +47,9 @@ object HttpApi extends App with Directives with Json4sSupport {
     }
 
   {
-    Http().bindAndHandle(route, "localhost", 8080)
+    val example = system.actorOf(HelloWorldActor.props, "example-actor")
+    Http().bindAndHandle(route(example), "localhost", 8080)
     println("Controller API started at http://localhost:8080/")
-
-    system.actorOf(ExampleActor.props, "example-actor")
   }
 }
 
