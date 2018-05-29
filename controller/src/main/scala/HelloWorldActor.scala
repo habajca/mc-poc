@@ -1,19 +1,14 @@
 package controller
 
-import controller.HelloWorldActor.HelloWorldRequest
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.typed.Behavior
+import akka.actor.typed.scaladsl.Behaviors
 
 object HelloWorldActor {
-  def props: Props = Props(new HelloWorldActor)
-
   final case class HelloWorldRequest(name: Option[String])
-}
 
-class HelloWorldActor extends Actor with ActorLogging {
-  override def preStart(): Unit = log.info("HelloWorldActor started")
-  override def postStop(): Unit = log.info("HelloWorldActor stopped")
-
-  override def receive: Receive = {
-    case HelloWorldRequest(name) => log.info(name.toString)
+  val requestHandler: Behavior[HelloWorldRequest] = Behaviors.receive {
+    case (ctx, HelloWorldRequest(name)) =>
+      ctx.log.info(name.toString)
+      Behaviors.same
   }
 }

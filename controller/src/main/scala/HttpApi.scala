@@ -2,7 +2,9 @@ package controller
 
 import controller.HelloWorldActor.HelloWorldRequest
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.{ActorSystem => UntypedActorSystem}
+import akka.actor.typed.{ActorSystem, DispatcherSelector}
+import akka.actor.typed.scaladsl.adapter.TypedActorSystemOps
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives
 import akka.stream.ActorMaterializer
@@ -10,22 +12,25 @@ import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import org.json4s.{jackson, DefaultFormats}
 
 object HttpApi extends App with Directives with Json4sSupport {
-  implicit val system = ActorSystem("mc-poc-controller")
+  val system: ActorSystem[HelloWorldRequest] =
+    ActorSystem(HelloWorldActor.requestHandler, "mc-poc-controller")
+  implicit val untypedSystem: UntypedActorSystem = system.toUntyped
+  implicit val executionContext =
+    system.dispatchers.lookup(DispatcherSelector.default)
   implicit val materializer = ActorMaterializer()
-  implicit val executionContext = system.dispatcher
 
   implicit val serialization = jackson.Serialization
   implicit val formats = DefaultFormats
 
-  def route(example: ActorRef) =
+  lazy val route =
     path("hello") {
       get {
-        example ! HelloWorldRequest(None)
+        system ! HelloWorldRequest(None)
         complete(HttpResponse("Hello, world!"))
       } ~
         (put & entity(as[Option[HelloUser]])) {
           case r @ Some(HelloUser(Some(name))) =>
-            example ! HelloWorldRequest(Option(name))
+            system ! HelloWorldRequest(Option(name))
             complete(
               HttpResponse(
                 content = s"Hello, $name!",
@@ -34,7 +39,7 @@ object HttpApi extends App with Directives with Json4sSupport {
                 )
               ))
           case r =>
-            example ! HelloWorldRequest(None)
+            system ! HelloWorldRequest(None)
             complete(
               HttpResponse(
                 content = "Hello, world!",
@@ -47,8 +52,7 @@ object HttpApi extends App with Directives with Json4sSupport {
     }
 
   {
-    val example = system.actorOf(HelloWorldActor.props, "example-actor")
-    Http().bindAndHandle(route(example), "localhost", 8080)
+    Http().bindAndHandle(route, "localhost", 8080)
     println("Controller API started at http://localhost:8080/")
   }
 }
